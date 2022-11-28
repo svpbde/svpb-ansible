@@ -73,10 +73,25 @@ Vagrant.configure("2") do |config|
   #   apt-get install -y apache2
   # SHELL
 
+  # Make VM's name match ansible target host
+  config.vm.define "svpb"
+
+  # Copy vagrant's key authorization to root (needed by ansible playbook)
+  # A bit hacky via shell, as file provisioner doesn't allow privileged access
+  config.vm.provision "shell" do |s|
+    s.inline = <<-SHELL
+    mkdir -p /root/.ssh
+    cp /home/vagrant/.ssh/authorized_keys /root/.ssh/authorized_keys
+    SHELL
+    s.privileged = true
+  end
 
   config.vm.provision "ansible" do |ansible|
     ansible.verbose = "v"
     ansible.playbook = "playbook.yml"
+    # Do not force usage of user vagrant, instead use remote_user specified in
+    # playbook
+    ansible.force_remote_user = false
   end
 
 
