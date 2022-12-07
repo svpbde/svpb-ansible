@@ -168,26 +168,29 @@
     # static files in place:
     - name: Ensure static directory exists
       file:  dest=/home/svpb/svpb/static state=directory mode=755
-    - name: Patch STATIC_ROOT in svpb settings
-      replace: dest=/home/svpb/svpb/svpb/settings.py regexp="STATIC_ROOT = ''" replace="STATIC_ROOT = '{{ svpbhome }}/static'"
+    # Currently already hardcoded in git repo. ToDo: Evaluate if we want it configurable
+    # - name: Patch STATIC_ROOT in svpb settings
+    #   replace: dest=/home/svpb/svpb/svpb/settings.py regexp="STATIC_ROOT = ''" replace="STATIC_ROOT = '{{ svpbhome }}/static'"
     - name: Run collectstatic
       django_manage:  command=collectstatic app_path="{{ svpbhome }}" virtualenv=/home/svpb/svpb-venv
-    # prepare nginx configuration:
-    - name: Patch the svpb_nginx conf file from the default in the git repo FQDN
-      replace: dest=/home/svpb/svpb/wsgi/svpb_nginx.conf regexp='svpbfqdn' replace='{{ svpbfqdn }}'
-    - name: Patch the svpb_nginx conf file from the default in the git repo Home
-      replace: dest=/home/svpb/svpb/wsgi/svpb_nginx.conf regexp='svpbhome' replace='{{ svpbhome }}'
+    # Currently already hardcoded in git repo. ToDo: Evaluate if we want it configurable
+    # # prepare nginx configuration:
+    # - name: Patch the svpb_nginx conf file from the default in the git repo FQDN
+    #   replace: dest=/home/svpb/svpb/wsgi/svpb_nginx.conf regexp='svpbfqdn' replace='{{ svpbfqdn }}'
+    # - name: Patch the svpb_nginx conf file from the default in the git repo Home
+    #   replace: dest=/home/svpb/svpb/wsgi/svpb_nginx.conf regexp='svpbhome' replace='{{ svpbhome }}'
     # symblink the just created config file
     - name: Symlink the svpb configuration file from nginx
       file: dest=/etc/nginx/sites-enabled/svpb_conf.conf src=/home/svpb/svpb/wsgi/svpb_nginx.conf state=link
       remote_user: root
-    # tweak the uwsgi ini file settings
-    - name: Set chdir in uwsgi ini file
-      ini_file: dest=/home/svpb/svpb/wsgi/uwsgi.ini section=uwsgi option=chdir value=/home/svpb/svpb
-    - name: Set module in uwsgi ini file
-      ini_file: dest=/home/svpb/svpb/wsgi/uwsgi.ini section=uwsgi option=module value=svpb.wsgi
-    - name: Set socket in uwsgi ini file
-      ini_file: dest=/home/svpb/svpb/wsgi/uwsgi.ini section=uwsgi option=socket value=":8001"
+    # Currently already hardcoded in git repo. ToDo: Evaluate if we want it configurable
+    # # tweak the uwsgi ini file settings
+    # - name: Set chdir in uwsgi ini file
+    #   ini_file: dest=/home/svpb/svpb/wsgi/uwsgi.ini section=uwsgi option=chdir value=/home/svpb/svpb
+    # - name: Set module in uwsgi ini file
+    #   ini_file: dest=/home/svpb/svpb/wsgi/uwsgi.ini section=uwsgi option=module value=svpb.wsgi
+    # - name: Set socket in uwsgi ini file
+    #   ini_file: dest=/home/svpb/svpb/wsgi/uwsgi.ini section=uwsgi option=socket value=":8001"
     # restart nginx
     - name: restart nginx to be on the safe side
       service: name=nginx state=restarted enabled=yes
