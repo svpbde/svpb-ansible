@@ -191,6 +191,7 @@
     # restart nginx
     - name: restart nginx to be on the safe side
       service: name=nginx state=restarted enabled=yes
+      remote_user: root
     # start uwsgi happens via the svpb start!
   tags: nginx
 
