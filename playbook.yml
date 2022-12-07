@@ -107,7 +107,7 @@
         - python-pycurl
         - python-psycopg2
         - iptables
-        - ccrypt
+        # - ccrypt  # was used for backup encryption, needs rework
         - nginx
     - name: Install Django and friends
       pip: name={{ item }}
@@ -238,30 +238,30 @@
 # and finally, install the data fixtures. Not automated; this will highly depend on concrete setup
 
 ## get the backup process in place: install dropbox, install the crontab
-
-- name: Backup process
-  remote_user: svpb
-  hosts: svpb
-  vars:
-    dropboxuser: svpb
-  tasks:
-    # - name: Download dropbox
-    #   get_url: url=https://www.dropbox.com/download?plat=lnx.x86 dest=/home/svpb
-    # CareFUL: dropxbox needs manual intervention; local access to a url
-    - name: Put encrpytion password for dropbox in place
-      replace: dest=/home/svpb/svpb/dump.sh regexp=XXXX replace=uRohX5aeyei4Xoov
-    - name: Cronjob for backup
-      cron: name="backup SVPB" hour="3" minute="5" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb/dump.sh > /home/svpb/svpb/logs/dump.log 2>&1"
-    - name: Install dropbox init script
-      template: src=./dropbox.conf dest=/etc/init.d/dropbox mode=0755
-      remote_user: root
-    - name: Startup dropxbox service
-      service: name=dropbox state=restarted enabled=yes
-      remote_user: root
-      register: dropboxStartOutput
-    - name: Debug output from Dropbox service start
-      debug: var=dropboxStartOutput
-  tags: backup
+# ToDo: Find a fitting backup solution
+# - name: Backup process
+#   remote_user: svpb
+#   hosts: svpb
+#   vars:
+#     dropboxuser: svpb
+#   tasks:
+#     # - name: Download dropbox
+#     #   get_url: url=https://www.dropbox.com/download?plat=lnx.x86 dest=/home/svpb
+#     # CareFUL: dropxbox needs manual intervention; local access to a url
+#     - name: Put encrpytion password for dropbox in place
+#       replace: dest=/home/svpb/svpb/dump.sh regexp=XXXX replace=uRohX5aeyei4Xoov
+#     - name: Cronjob for backup
+#       cron: name="backup SVPB" hour="3" minute="5" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb/dump.sh > /home/svpb/svpb/logs/dump.log 2>&1"
+#     - name: Install dropbox init script
+#       template: src=./dropbox.conf dest=/etc/init.d/dropbox mode=0755
+#       remote_user: root
+#     - name: Startup dropxbox service
+#       service: name=dropbox state=restarted enabled=yes
+#       remote_user: root
+#       register: dropboxStartOutput
+#     - name: Debug output from Dropbox service start
+#       debug: var=dropboxStartOutput
+#   tags: backup
 
 - name: Regular jobs
   # check consistency, later on: send out emails
