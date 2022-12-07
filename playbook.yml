@@ -202,14 +202,6 @@
   remote_user: root
   hosts: svpb
   tasks:
-    - name: Logrotate for nginx
-      logrotate: name=nginx path=/var/log/nginx/*.log
-      args:
-        options:
-          - daily
-          - rotate 10
-          - compress
-          - missingok
     - name: Logrotate for svpb
       logrotate: name=svpb path=/home/svpb/svpb/logs/*.log
       args:
