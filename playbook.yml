@@ -69,8 +69,24 @@
   remote_user: root
   tasks:
     - action: user name=svpb comment="SVPB Arbeitsplan User" generate_ssh_key=yes state=present shell=/bin/bash
-    - action: copy src=~/.ssh/id_rsa.pub dest=/home/svpb/.ssh/authorized_keys owner=svpb group=svpb mode=0600
-    - copy: src=./svpb.conf dest=/etc/init/svpb.conf mode=0644
+    # - action: copy src=~/.ssh/id_rsa.pub dest=/home/svpb/.ssh/authorized_keys owner=svpb group=svpb mode=0600
+    # Instead of adding own public key (line above) allow access for vagrant's
+    # ssh key, which is already authorized for root
+    - file:
+        path: ~svpb/.ssh
+        state: directory
+        owner: svpb
+        group: svpb
+        mode: 0700
+    - name: Copy root's authorized_keys to svpb user
+      copy:
+        src: /root/.ssh/authorized_keys
+        dest: ~svpb/.ssh/authorized_keys
+        owner: svpb
+        group: svpb
+        mode: 0700
+        force: false
+        remote_src: true
 
 - name: Basic software installation
   hosts: svpb
