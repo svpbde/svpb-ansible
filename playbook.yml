@@ -8,6 +8,15 @@
 # - there should be an encryption key for dropbox-based backups. See below!
 # - Ansible: www.ansible.com/
 
+- name: Prepare package manager
+  remote_user: root
+  hosts: svpb
+  tasks:
+    - name: Update cache and install gpg for apt key management
+      ansible.builtin.apt:
+        name: gpg
+        update_cache: yes
+
 - name: Firewall
   remote_user: root
   hosts: svpb
@@ -26,6 +35,15 @@
       ufw: state=enabled policy=deny
 
   tags: fw
+
+- name: Install dependency of ansible anxs.postgresql role
+  hosts: svpb
+  remote_user: root
+  tasks:
+    - name: Ansible postgresdb requirements via apt
+      apt: name={{ item }} state=latest
+      with_items:
+        - python3-psycopg2
 
 - name: PostgresDB
   remote_user: root
