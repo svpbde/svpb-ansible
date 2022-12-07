@@ -13,7 +13,7 @@
   hosts: svpb
   tasks:
     - name: Get ufw
-      apt: name=ufw state=installed
+      apt: name=ufw state=latest
     - name: turn loggin on
       ufw: logging=on
     - name: allow ssh
@@ -36,14 +36,14 @@
     postgresql_users:
       - name: svpbdb
         pass: Eef1Aef3
-        encrypted: no
+        encrypted: yes
     postgresql_user_privileges:
       - name: svpbdb          # user name
         db: svpbdata         # database
         priv: "ALL"        # privilege string format: example: INSERT,UPDATE/table:SELECT/anothertable:ALL
         # TODO: fix privileges as soon as we have to share the databse with someone else
   roles:
-    - ANXS.postgresql
+    - anxs.postgresql
 
 
 - name: CreateSVPB-User
@@ -59,7 +59,7 @@
   remote_user: root
   tasks:
     - name: Basic software via apt
-      apt: name={{ item }} state=installed
+      apt: name={{ item }} state=latest
       with_items:
         - build-essential
         - ntp
