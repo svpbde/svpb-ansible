@@ -102,33 +102,19 @@
         - build-essential
         - ntp
         - git
-        - python-dev
-        - python-pip
-        - python-pycurl
-        - python-psycopg2
+        - language-pack-de-base # needed for localisation of django apps
+        - python3-dev # needed to build Pillow
+        - zlib1g-dev # needed to build Pillow
+        - libjpeg8-dev # needed to build Pillow
+        - python3-pip
+        - python3-pycurl
+        - virtualenv
         - iptables
         # - ccrypt  # was used for backup encryption, needs rework
         - nginx
-    - name: Install Django and friends
-      pip: name={{ item }}
-      with_items:
-        - django
-        - django_extensions
-        - django_tables2
-        - django-crispy_forms
-        - django-impersonate
-        - django-post_office
-        - django-sendfile
-        - Werkzeug
-        - pytz
-        - uwsgi
-        - django-password-reset
-        - django_select2
-        - pwgen
-        - jinja2
-        - xlsxwriter
-        - xlsxcursor
-        - Pillow
+    - name: Update locales # needed as we just installed language-pack-de-base
+      ansible.builtin.command:
+        cmd: locale-gen
   tags: software
 
 
@@ -137,27 +123,38 @@
   hosts: svpb
   tasks:
     - name: Get the repository
-      git: repo=https://github.com/hkarl/svpb.git dest=/home/svpb/svpb
-    - name: Patch the settings file to use the Postgres DB
-      replace: dest=/home/svpb/svpb/svpb/settings.py regexp='django.db.backends.sqlite3' replace='django.db.backends.postgresql_psycopg2'
-    - name: Patch settings for DB name
-      replace: dest=/home/svpb/svpb/svpb/settings.py regexp='svpb.sq' replace='svpbdata'
-    - name: Patch settings for DB User account
-      replace: dest=/home/svpb/svpb/svpb/settings.py regexp='UserPlaceholder' replace='svpbdb'
+      git: repo=https://github.com/hkarl/svpb.git dest=/home/svpb/svpb update=false version=django3
+    # ToDo: Fix settings.py in django3 branch
+    #- name: Patch the settings file to use the Postgres DB
+    #  replace: dest=/home/svpb/svpb/svpb/settings.py regexp='django.db.backends.sqlite3' replace='django.db.backends.postgresql_psycopg2'
+    #- name: Patch settings for DB name
+    #  replace: dest=/home/svpb/svpb/svpb/settings.py regexp='svpb.sq' replace='svpbdata'
+    #- name: Patch settings for DB User account
+    #  replace: dest=/home/svpb/svpb/svpb/settings.py regexp='UserPlaceholder' replace='svpbdb'
     - name: Patch settings for DB password
-      replace: dest=/home/svpb/svpb/svpb/settings.py regexp='PasswordPlaceholder' replace='Eef1Aef3'
-    - name: Copy email settings
-      copy: src=~/c.prog/svpb/svpb/emailSettings.py dest=/home/svpb/svpb/svpb/emailSettings.py owner=svpb group=svpb mode=0600
+      replace: dest=/home/svpb/svpb/svpb/settings.py regexp='XXXXX' replace='Eef1Aef3'
+      # replace: dest=/home/svpb/svpb/svpb/settings.py regexp='PasswordPlaceholder' replace='Eef1Aef3'
+    # ToDo: Clever credential management with differentiation between production and test VM
+    #- name: Copy email settings
+    #  copy: src=~/c.prog/svpb/svpb/emailSettings.py dest=/home/svpb/svpb/svpb/emailSettings.py owner=svpb group=svpb mode=0600
     - name: Create logs directory
       file: path=/home/svpb/svpb/logs state=directory
+    - name: Install python requirements via pip
+      pip:
+        requirements: /home/svpb/svpb/requirementsP3.txt
+        virtualenv: /home/svpb/svpb-venv
+    - name: Install python requirements missing in github repo's requirementsP3.txt
+      pip:
+        name: django-post_office
+        virtualenv: /home/svpb/svpb-venv
     - name: Migrate the database
-      shell: cd svpb ; python manage.py migrate > logs/migrate.out 2> logs/migrate.err
+      shell: cd svpb ; /home/svpb/svpb-venv/bin/python3 manage.py migrate > logs/migrate.out 2> logs/migrate.err
     - name: Cronjob for emailing
-      cron: name="send emails" hour="3" minute="0" user=svpb state=present job="cd /home/svpb/svpb ; python manage.py upcomingJob 2 > /home/svpb/svpb/logs/upcomingJobs.log  2>&1"
+      cron: name="send emails" hour="3" minute="0" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py upcomingJob 2 > /home/svpb/svpb/logs/upcomingJobs.log  2>&1"
     - name: Cronjob for emailaing earlier
-      cron: name="send emails" hour="3" minute="10" user=svpb state=present job="cd /home/svpb/svpb ; python manage.py upcomingJob 5 >> /home/svpb/svpb/logs/upcomingJobs.log  2>&1"
+      cron: name="send emails" hour="3" minute="10" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py upcomingJob 5 >> /home/svpb/svpb/logs/upcomingJobs.log  2>&1"
     - name: Cronjob for leistungsreminder
-      cron: name="send emails" hour="3" minute="20" user=svpb state=present job="cd /home/svpb/svpb ; python manage.py reminderLeistungen > /home/svpb/svpb/logs/reminderLeistungen.log  2>&1"
+      cron: name="send emails" hour="3" minute="20" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py reminderLeistungen > /home/svpb/svpb/logs/reminderLeistungen.log  2>&1"
   tags: svpb
 
 - name: Nginx configuration
@@ -174,7 +171,7 @@
     - name: Patch STATIC_ROOT in svpb settings
       replace: dest=/home/svpb/svpb/svpb/settings.py regexp="STATIC_ROOT = ''" replace="STATIC_ROOT = '{{ svpbhome }}/static'"
     - name: Run collectstatic
-      django_manage:  command=collectstatic app_path="{{ svpbhome }}"
+      django_manage:  command=collectstatic app_path="{{ svpbhome }}" virtualenv=/home/svpb/svpb-venv
     # prepare nginx configuration:
     - name: Patch the svpb_nginx conf file from the default in the git repo FQDN
       replace: dest=/home/svpb/svpb/wsgi/svpb_nginx.conf regexp='svpbfqdn' replace='{{ svpbfqdn }}'
