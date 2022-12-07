@@ -87,6 +87,10 @@
         mode: 0700
         force: false
         remote_src: true
+    # Old init script for SysV (SysV was replaced by systemd in ubuntu 15.04)
+    # ToDo: Match service management to what is done in production
+    # - copy: src=./svpb.conf dest=/etc/init/svpb.conf mode=0644
+
 
 - name: Basic software installation
   hosts: svpb
@@ -217,17 +221,19 @@
           - create 600 svpb svpb
   tags: system
 
-- name: StartSVPB
-  # this actually starts  uwsgi !
-  remote_user: root
-  hosts: svpb
-  tasks:
-    - name: ensure start up of SVPB
-      service: name=svpb state=restarted enabled=yes
-    # this is a workaround: state=restarted does not seem to work reliably :-(
-    - name: really restart SVPB
-      shell: /usr/sbin/service svpb restart
-  tags: svpb
+# The following relied on the SysV init script (see above)
+# ToDo: Match service management to what is done in production
+# - name: StartSVPB
+#   # this actually starts  uwsgi !
+#   remote_user: root
+#   hosts: svpb
+#   tasks:
+#     - name: ensure start up of SVPB
+#       service: name=svpb state=restarted enabled=yes
+#     # this is a workaround: state=restarted does not seem to work reliably :-(
+#     - name: really restart SVPB
+#       shell: /usr/sbin/service svpb restart
+#   tags: svpb
 
 # and finally, install the data fixtures. Not automated; this will highly depend on concrete setup
 
