@@ -109,7 +109,6 @@
         - python3-pip
         - python3-pycurl
         - virtualenv
-        - iptables
         # - ccrypt  # was used for backup encryption, needs rework
         - nginx
     - name: Update locales # needed as we just installed language-pack-de-base
