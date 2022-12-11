@@ -121,17 +121,15 @@
   hosts: svpb
   tasks:
     - name: Get the repository
-      git: repo=https://github.com/hkarl/svpb.git dest=/home/svpb/svpb update=false version=django3
-    # ToDo: Fix settings.py in django3 branch
-    #- name: Patch the settings file to use the Postgres DB
-    #  replace: dest=/home/svpb/svpb/svpb/settings.py regexp='django.db.backends.sqlite3' replace='django.db.backends.postgresql_psycopg2'
-    #- name: Patch settings for DB name
-    #  replace: dest=/home/svpb/svpb/svpb/settings.py regexp='svpb.sq' replace='svpbdata'
-    #- name: Patch settings for DB User account
-    #  replace: dest=/home/svpb/svpb/svpb/settings.py regexp='UserPlaceholder' replace='svpbdb'
+      git: repo=https://github.com/svpbde/svpb.git dest=/home/svpb/svpb update=false version=develop
+    - name: Patch the settings file to use the Postgres DB
+      replace: dest=/home/svpb/svpb/svpb/settings.py regexp='django.db.backends.sqlite3' replace='django.db.backends.postgresql_psycopg2'
+    - name: Patch settings for DB name
+      replace: dest=/home/svpb/svpb/svpb/settings.py regexp='svpb.sq' replace='svpbdata'
+    - name: Patch settings for DB User account
+      replace: dest=/home/svpb/svpb/svpb/settings.py regexp='UserPlaceholder' replace='svpbdb'
     - name: Patch settings for DB password
-      replace: dest=/home/svpb/svpb/svpb/settings.py regexp='XXXXX' replace='Eef1Aef3'
-      # replace: dest=/home/svpb/svpb/svpb/settings.py regexp='PasswordPlaceholder' replace='Eef1Aef3'
+      replace: dest=/home/svpb/svpb/svpb/settings.py regexp='PasswordPlaceholder' replace='Eef1Aef3'
     # ToDo: Clever credential management with differentiation between production and test VM
     #- name: Copy email settings
     #  copy: src=~/c.prog/svpb/svpb/emailSettings.py dest=/home/svpb/svpb/svpb/emailSettings.py owner=svpb group=svpb mode=0600
@@ -140,10 +138,6 @@
     - name: Install python requirements via pip
       pip:
         requirements: /home/svpb/svpb/requirementsP3.txt
-        virtualenv: /home/svpb/svpb-venv
-    - name: Install python requirements missing in github repo's requirementsP3.txt
-      pip:
-        name: django-post_office
         virtualenv: /home/svpb/svpb-venv
     - name: Migrate the database
       shell: cd svpb ; /home/svpb/svpb-venv/bin/python3 manage.py migrate > logs/migrate.out 2> logs/migrate.err
