@@ -1,12 +1,12 @@
 ---
 
-# An Ansible playbook to install the SVPB Web application on a remote Linux machine
+# An Ansible playbook to install the SVPB Web application on a Linux machine
 # Assumptions:
-# - apt-based system; tested on Ubuntu 14.04 LTS; Debian should work fine as well
+# - apt-based system; tested on Ubuntu 18.04 LTS; Debian should work fine as well
 # - root access has been ensured by copying the public key of the user running this playbook to
-#   ~root/.ssh/authorized_keys - like jiffyBox does in a very convenient way
-# - there should be an encryption key for dropbox-based backups. See below!
-# - Ansible: www.ansible.com/
+#   ~root/.ssh/authorized_keys
+# Currently only intended for tests in a local VM with vagrant, not tested in
+# production.
 
 - name: Prepare package manager
   remote_user: root
