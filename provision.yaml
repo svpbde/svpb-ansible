@@ -8,20 +8,24 @@
   remote_user: svpb
   hosts: svpb
   tasks:
-    - name: stop uwsgi
-      remote_user: root
-      shell: service svpb stop
-      ignore_errors: yes
+    # ToDo: Match service management to what is done in production
+    # - name: stop uwsgi
+    #  remote_user: root
+    #  shell: service svpb stop
+    #  ignore_errors: yes
     - name: stash git
-      shell: cd svpb ; git stash
+      shell: cd svpb ; git -c user.name="git stash" -c user.email=git@stash stash
+      # Having to configure a user will become obsolete with git 2.21, see
+      # https://stackoverflow.com/questions/36798310/git-create-stash-without-need-to-configure-user-email-and-user-name-git-stash
     - name: pull from git
       shell: cd svpb ; git pull
     - name: unstash git
       shell: cd svpb ; git stash pop
     - name: migrate django
-      shell: cd svpb ; python manage.py migrate
+      shell: cd svpb ; /home/svpb/svpb-venv/bin/python3 manage.py migrate
     - name: static files for django
-      shell: cd svpb ; python manage.py collectstatic --noinput
-    - name: start uwsgi
-      remote_user: root
-      service: name=svpb state=started
+      shell: cd svpb ; /home/svpb/svpb-venv/bin/python3 manage.py collectstatic --noinput
+    # ToDo: Match service management to what is done in production
+    # - name: start uwsgi
+    #   remote_user: root
+    #   service: name=svpb state=started
