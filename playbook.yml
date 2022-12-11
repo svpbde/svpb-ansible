@@ -107,7 +107,6 @@
         - zlib1g-dev # needed to build Pillow
         - libjpeg8-dev # needed to build Pillow
         - python3-pip
-        - python3-pycurl
         - virtualenv
         # - ccrypt  # was used for backup encryption, needs rework
         - nginx
