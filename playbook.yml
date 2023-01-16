@@ -259,4 +259,6 @@
       cron: name="Meldung check" hour="3" minute="10" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py meldungConsistent > /home/svpb/svpb/logs/check.log  2>&1"
     - name: Yearend check, set Arbeitslast to default for newly joined members
       cron: name="Yearend check" hour="23" minute="0" day="31" month="12" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py yearendArbeitslast > /home/svpb/svpb/logs/yearend.log  2>&1"
+    - name: Send reservation emails
+      cron: name="Send reservation emails" minute="12" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py reservationEmails > /home/svpb/svpb/logs/reservation.emails.log 2>&1"
   tags: regular
