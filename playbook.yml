@@ -139,11 +139,11 @@
     - name: Migrate the database
       shell: cd svpb ; /home/svpb/svpb-venv/bin/python3 manage.py migrate > logs/migrate.out 2> logs/migrate.err
     - name: Cronjob for emailing
-      cron: name="send emails" hour="3" minute="0" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py upcomingJob 2 > /home/svpb/svpb/logs/upcomingJobs.log  2>&1"
+      cron: name="Send emails for upcoming jobs" hour="3" minute="0" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py upcomingJob 2 > /home/svpb/svpb/logs/upcomingJobs.log  2>&1"
     - name: Cronjob for emailaing earlier
-      cron: name="send emails" hour="3" minute="10" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py upcomingJob 5 >> /home/svpb/svpb/logs/upcomingJobs.log  2>&1"
+      cron: name="Send early emails for upcoming jobs" hour="3" minute="10" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py upcomingJob 5 >> /home/svpb/svpb/logs/upcomingJobs.log  2>&1"
     - name: Cronjob for leistungsreminder
-      cron: name="send emails" hour="3" minute="20" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py reminderLeistungen > /home/svpb/svpb/logs/reminderLeistungen.log  2>&1"
+      cron: name="Send emails to process Leistungsmeldungen" hour="3" minute="20" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py reminderLeistungen > /home/svpb/svpb/logs/reminderLeistungen.log  2>&1"
   tags: svpb
 
 - name: Nginx configuration
