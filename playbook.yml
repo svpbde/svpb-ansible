@@ -171,6 +171,21 @@
     #   replace: dest=/home/svpb/svpb/wsgi/svpb_nginx.conf regexp='svpbfqdn' replace='{{ svpbfqdn }}'
     # - name: Patch the svpb_nginx conf file from the default in the git repo Home
     #   replace: dest=/home/svpb/svpb/wsgi/svpb_nginx.conf regexp='svpbhome' replace='{{ svpbhome }}'
+    # nginx config patches for local dev VM
+    - name: Patch the svpb_nginx conf file - Disable SSL
+      replace:
+        path: /home/svpb/svpb/wsgi/svpb_nginx.conf
+        after: "# substitute your machine's IP address or FQDN"
+        before: '    charset'
+        regexp: '.*'
+        replace: ''
+    - name: Patch the svpb_nginx conf file - Allow access from localhost
+      replace:
+        path: /home/svpb/svpb/wsgi/svpb_nginx.conf
+        after: "server_name "
+        before: ';'
+        regexp: '.*'
+        replace: '127.0.0.1'
     # symblink the just created config file
     - name: Symlink the svpb configuration file from nginx
       file: dest=/etc/nginx/sites-enabled/svpb_conf.conf src=/home/svpb/svpb/wsgi/svpb_nginx.conf state=link
