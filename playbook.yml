@@ -134,7 +134,7 @@
       file: path=/home/svpb/svpb/logs state=directory
     - name: Install python requirements via pip
       pip:
-        requirements: /home/svpb/svpb/requirementsP3.txt
+        requirements: /home/svpb/svpb/requirements.txt
         virtualenv: /home/svpb/svpb-venv
     - name: Migrate the database
       shell: cd svpb ; /home/svpb/svpb-venv/bin/python3 manage.py migrate > logs/migrate.out 2> logs/migrate.err
