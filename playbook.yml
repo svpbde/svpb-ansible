@@ -2,49 +2,60 @@
 
 # An Ansible playbook to install the SVPB Web application on a Linux machine
 # Assumptions:
-# - apt-based system; tested on Ubuntu 18.04 LTS; Debian should work fine as well
-# - root access has been ensured by copying the public key of the user running this playbook to
-#   ~root/.ssh/authorized_keys
+# - dnf-based system; tested on CentOS 8 Stream
+# - root access has been ensured by copying the public key of the user running
+#   this playbook to ~root/.ssh/authorized_keys
 # Currently only intended for tests in a local VM with vagrant, not tested in
 # production.
-
-- name: Prepare package manager
-  remote_user: root
-  hosts: svpb
-  tasks:
-    - name: Update cache and install gpg for apt key management
-      ansible.builtin.apt:
-        name: gpg
-        update_cache: yes
-
-
-
-- name: Install dependency of ansible anxs.postgresql role
-  hosts: svpb
-  remote_user: root
-  tasks:
-    - name: Ansible postgresdb requirements via apt
-      apt: name={{ item }} state=latest
-      with_items:
-        - python3-psycopg2
 
 - name: PostgresDB
   remote_user: root
   hosts: svpb
-  vars:
-    postgresql_databases:
-      - name: svpbdata
-    postgresql_users:
-      - name: svpbdb
-        pass: Eef1Aef3
+  tasks:
+    - name: Install postgresql
+      dnf:
+        name: postgresql-server
+        state: latest
+    - name: Check if postgresql needs init
+      stat:
+        path: /var/lib/pgsql/data/PG_VERSION
+      register: pgdata_dir_initialized
+    - name: Init postgresql
+      command: postgresql-setup --initdb
+      when: not pgdata_dir_initialized.stat.exists
+    - name: Enable local login with hashed password - IPv4
+      replace:
+        dest: /var/lib/pgsql/data/pg_hba.conf
+        regexp: ^(host[ ]+all[ ]+all[ ]+127.0.0.1/32[ ]+)ident
+        replace: \1md5
+    - name: Enable local login with hashed password - IPv6
+      replace:
+        dest: /var/lib/pgsql/data/pg_hba.conf
+        regexp: ^(host[ ]+all[ ]+all[ ]+::1/128[ ]+)ident
+        replace: \1md5
+    - name: Enable & restart service
+      service:
+        name: postgresql
+        state: restarted
+        enabled: yes
+    - name: Ansible postgresdb requirements via dnf
+      dnf: name={{ item }} state=latest
+      with_items:
+        - python3-psycopg2
+    - name: Create Postgres DB
+      become: true
+      become_user: postgres
+      postgresql_db:
+        name: svpbdata
+    - name: Create Postgres DB User
+      become: true
+      become_user: postgres
+      postgresql_user:
+        db: svpbdata
+        name: svpbdb
+        password: Eef1Aef3
         encrypted: yes
-    postgresql_user_privileges:
-      - name: svpbdb          # user name
-        db: svpbdata         # database
-        priv: "ALL"        # privilege string format: example: INSERT,UPDATE/table:SELECT/anothertable:ALL
-        # TODO: fix privileges as soon as we have to share the databse with someone else
-  roles:
-    - anxs.postgresql
+        priv: "ALL"
 
 
 - name: CreateSVPB-User
@@ -76,23 +87,18 @@
   hosts: svpb
   remote_user: root
   tasks:
-    - name: Basic software via apt
-      apt: name={{ item }} state=latest
+    - name: Basic software via dnf
+      dnf: name={{ item }} state=latest
       with_items:
-        - build-essential
-        - ntp
         - git
-        - language-pack-de-base # needed for localisation of django apps
-        - python3-dev # needed to build Pillow
-        - zlib1g-dev # needed to build Pillow
-        - libjpeg8-dev # needed to build Pillow
+        - glibc-langpack-de
+        - python3-devel # needed to build Pillow
+        - zlib-devel # needed to build Pillow
+        - libjpeg-devel # needed to build Pillow
         - python3-pip
-        - virtualenv
+        - python3-virtualenv
         # - ccrypt  # was used for backup encryption, needs rework
         - nginx
-    - name: Update locales # needed as we just installed language-pack-de-base
-      ansible.builtin.command:
-        cmd: locale-gen
   tags: software
 
 
@@ -168,7 +174,7 @@
         replace: '127.0.0.1'
     # symblink the just created config file
     - name: Symlink the svpb configuration file from nginx
-      file: dest=/etc/nginx/sites-enabled/svpb_conf.conf src=/home/svpb/svpb/wsgi/svpb_nginx.conf state=link
+      file: dest=/etc/nginx/conf.d/svpb_conf.conf src=/home/svpb/svpb/wsgi/svpb_nginx.conf state=link
       remote_user: root
     # Currently already hardcoded in git repo. ToDo: Evaluate if we want it configurable
     # # tweak the uwsgi ini file settings
@@ -178,8 +184,7 @@
     #   ini_file: dest=/home/svpb/svpb/wsgi/uwsgi.ini section=uwsgi option=module value=svpb.wsgi
     # - name: Set socket in uwsgi ini file
     #   ini_file: dest=/home/svpb/svpb/wsgi/uwsgi.ini section=uwsgi option=socket value=":8001"
-    # restart nginx
-    - name: restart nginx to be on the safe side
+    - name: Restart and enable nginx
       service: name=nginx state=restarted enabled=yes
       remote_user: root
     # start uwsgi happens via the svpb start!

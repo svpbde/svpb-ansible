@@ -26,11 +26,6 @@ sudo apt install vagrant-libvirt libvirt-daemon-system qemu-system-x86
 sudo usermod -a -G libvirt <YOUR USERNAME>
 ```
 
-The ansible playbook uses the role "anxs.postgresql" which has to be installed on the host via
-```
-ansible-galaxy install anxs.postgresql
-```
-
 Usage
 -----
 ```
