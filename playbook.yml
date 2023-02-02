@@ -17,24 +17,7 @@
         name: gpg
         update_cache: yes
 
-- name: Firewall
-  remote_user: root
-  hosts: svpb
-  tasks:
-    - name: Get ufw
-      apt: name=ufw state=latest
-    - name: turn loggin on
-      ufw: logging=on
-    - name: allow ssh
-      ufw: rule=limit port=ssh proto=tcp
-    - name: allow OpenSSH
-      ufw: rule=limit name=OpenSSH
-    - name: allow Web80
-      ufw: rule=allow port=80 proto=tcp
-    - name: turn on ufw
-      ufw: state=enabled policy=deny
 
-  tags: fw
 
 - name: Install dependency of ansible anxs.postgresql role
   hosts: svpb
