@@ -121,7 +121,7 @@
     - name: Patch the settings file to use the Postgres DB
       replace: dest=/home/svpb/svpb/svpb/settings.py regexp='django.db.backends.sqlite3' replace='django.db.backends.postgresql_psycopg2'
     - name: Patch settings for DB name
-      replace: dest=/home/svpb/svpb/svpb/settings.py regexp='svpb.sq' replace='svpbdata'
+      replace: dest=/home/svpb/svpb/svpb/settings.py regexp="BASE_DIR / 'svpb.sq'" replace="'svpbdata'"
     - name: Patch settings for DB User account
       replace: dest=/home/svpb/svpb/svpb/settings.py regexp='UserPlaceholder' replace='svpbdb'
     - name: Patch settings for DB password
