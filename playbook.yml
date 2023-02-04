@@ -8,6 +8,16 @@
 # Currently only intended for tests in a local VM with vagrant, not tested in
 # production.
 
+
+- name: Put SELinux in permissive mode, logging actions that would be blocked.
+  remote_user: root
+  hosts: svpb
+  tasks:
+    - ansible.posix.selinux:
+    policy: targeted
+    state: permissive
+
+
 - name: PostgresDB
   remote_user: root
   hosts: svpb
