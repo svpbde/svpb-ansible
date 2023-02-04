@@ -154,6 +154,13 @@
     svpbfqdn: mein.svpb.de
   tasks:
     # static files in place:
+    - name: Grant nginx access to svpb's home for serving static files
+      remote_user: root
+      file:
+        path: ~svpb
+        owner: svpb
+        group: nginx
+        mode: 0750
     - name: Ensure static directory exists
       file:  dest=/home/svpb/svpb/static state=directory mode=755
     # Currently already hardcoded in git repo. ToDo: Evaluate if we want it configurable
