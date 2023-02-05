@@ -9,11 +9,12 @@
 # production.
 
 
-- name: Put SELinux in permissive mode, logging actions that would be blocked.
+- name: Configure SELinux
   remote_user: root
   hosts: svpb
   tasks:
-    - ansible.posix.selinux:
+    - name: Put SELinux in permissive mode, logging actions that would be blocked.
+      ansible.posix.selinux:
         policy: targeted
         state: permissive
 
@@ -76,7 +77,8 @@
     # - action: copy src=~/.ssh/id_rsa.pub dest=/home/svpb/.ssh/authorized_keys owner=svpb group=svpb mode=0600
     # Instead of adding own public key (line above) allow access for vagrant's
     # ssh key, which is already authorized for root
-    - ansible.builtin.file:
+    - name: Ensure svpb's .ssh directory exists
+      ansible.builtin.file:
         path: ~svpb/.ssh
         state: directory
         owner: svpb
@@ -145,8 +147,8 @@
         regexp: 'PasswordPlaceholder'
         replace: 'Eef1Aef3'
     # ToDo: Clever credential management with differentiation between production and test VM
-    #- name: Copy email settings
-    #  copy: src=~/c.prog/svpb/svpb/emailSettings.py dest=/home/svpb/svpb/svpb/emailSettings.py owner=svpb group=svpb mode=0600
+    # - name: Copy email settings
+    #   copy: src=~/c.prog/svpb/svpb/emailSettings.py dest=/home/svpb/svpb/svpb/emailSettings.py owner=svpb group=svpb mode=0600
     - name: Create logs directory
       ansible.builtin.file:
         path: /home/svpb/svpb/logs
