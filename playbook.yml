@@ -73,7 +73,13 @@
   hosts: svpb
   remote_user: root
   tasks:
-    - action: user name=svpb comment="SVPB Arbeitsplan User" generate_ssh_key=yes state=present shell=/bin/bash
+    - name: Ensure svpb user exists
+      ansible.builtin.user:
+        name: svpb
+        comment: "SVPB Arbeitsplan User"
+        generate_ssh_key: true
+        state: present
+        shell: /bin/bash
     # - action: copy src=~/.ssh/id_rsa.pub dest=/home/svpb/.ssh/authorized_keys owner=svpb group=svpb mode=0600
     # Instead of adding own public key (line above) allow access for vagrant's
     # ssh key, which is already authorized for root
