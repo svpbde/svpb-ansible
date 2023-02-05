@@ -23,44 +23,44 @@
   hosts: svpb
   tasks:
     - name: Install postgresql
-      dnf:
+      ansible.builtin.dnf:
         name: postgresql-server
         state: latest
     - name: Check if postgresql needs init
-      stat:
+      ansible.builtin.stat:
         path: /var/lib/pgsql/data/PG_VERSION
       register: pgdata_dir_initialized
     - name: Init postgresql
-      command: postgresql-setup --initdb
+      ansible.builtin.command: postgresql-setup --initdb
       when: not pgdata_dir_initialized.stat.exists
     - name: Enable local login with hashed password - IPv4
-      replace:
+      ansible.builtin.replace:
         dest: /var/lib/pgsql/data/pg_hba.conf
         regexp: ^(host[ ]+all[ ]+all[ ]+127.0.0.1/32[ ]+)ident
         replace: \1md5
     - name: Enable local login with hashed password - IPv6
-      replace:
+      ansible.builtin.replace:
         dest: /var/lib/pgsql/data/pg_hba.conf
         regexp: ^(host[ ]+all[ ]+all[ ]+::1/128[ ]+)ident
         replace: \1md5
     - name: Enable & restart service
-      service:
+      ansible.builtin.service:
         name: postgresql
         state: restarted
         enabled: yes
     - name: Ansible postgresdb requirements via dnf
-      dnf:
+      ansible.builtin.dnf:
         name: python3-psycopg2
         state: latest
     - name: Create Postgres DB
       become: true
       become_user: postgres
-      postgresql_db:
+      community.postgresql.postgresql_db:
         name: svpbdata
     - name: Create Postgres DB User
       become: true
       become_user: postgres
-      postgresql_user:
+      community.postgresql.postgresql_user:
         db: svpbdata
         name: svpbdb
         password: Eef1Aef3
@@ -76,14 +76,14 @@
     # - action: copy src=~/.ssh/id_rsa.pub dest=/home/svpb/.ssh/authorized_keys owner=svpb group=svpb mode=0600
     # Instead of adding own public key (line above) allow access for vagrant's
     # ssh key, which is already authorized for root
-    - file:
+    - ansible.builtin.file:
         path: ~svpb/.ssh
         state: directory
         owner: svpb
         group: svpb
         mode: 0700
     - name: Copy root's authorized_keys to svpb user
-      copy:
+      ansible.builtin.copy:
         src: /root/.ssh/authorized_keys
         dest: ~svpb/.ssh/authorized_keys
         owner: svpb
@@ -98,7 +98,7 @@
   remote_user: root
   tasks:
     - name: Basic software via dnf
-      dnf:
+      ansible.builtin.dnf:
         name: "{{ item }}"
         state: latest
       with_items:
@@ -119,28 +119,28 @@
   hosts: svpb
   tasks:
     - name: Get the repository
-      git:
+      ansible.builtin.git:
         repo: https://github.com/svpbde/svpb.git
         dest: /home/svpb/svpb
         update: false
         version: develop
     - name: Patch the settings file to use the Postgres DB
-      replace:
+      ansible.builtin.replace:
         dest: /home/svpb/svpb/svpb/settings.py
         regexp: 'django.db.backends.sqlite3'
         replace: 'django.db.backends.postgresql_psycopg2'
     - name: Patch settings for DB name
-      replace:
+      ansible.builtin.replace:
         dest: /home/svpb/svpb/svpb/settings.py
         regexp: "BASE_DIR / 'svpb.sq'"
         replace: "'svpbdata'"
     - name: Patch settings for DB User account
-      replace:
+      ansible.builtin.replace:
         dest: /home/svpb/svpb/svpb/settings.py
         regexp: 'UserPlaceholder'
         replace: 'svpbdb'
     - name: Patch settings for DB password
-      replace: 
+      ansible.builtin.replace:
         dest: /home/svpb/svpb/svpb/settings.py
         regexp: 'PasswordPlaceholder'
         replace: 'Eef1Aef3'
@@ -148,17 +148,17 @@
     #- name: Copy email settings
     #  copy: src=~/c.prog/svpb/svpb/emailSettings.py dest=/home/svpb/svpb/svpb/emailSettings.py owner=svpb group=svpb mode=0600
     - name: Create logs directory
-      file: 
+      ansible.builtin.file:
         path: /home/svpb/svpb/logs
         state: directory
     - name: Install python requirements via pip
-      pip:
+      ansible.builtin.pip:
         requirements: /home/svpb/svpb/requirements.txt
         virtualenv: /home/svpb/svpb-venv
     - name: Migrate the database
-      shell: cd svpb ; /home/svpb/svpb-venv/bin/python3 manage.py migrate > logs/migrate.out 2> logs/migrate.err
+      ansible.builtin.shell: cd svpb ; /home/svpb/svpb-venv/bin/python3 manage.py migrate > logs/migrate.out 2> logs/migrate.err
     - name: Cronjob for emailing
-      cron:
+      ansible.builtin.cron:
         name: "Send emails for upcoming jobs"
         hour: "3"
         minute: "0"
@@ -166,7 +166,7 @@
         state: present
         job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py upcomingJob 2 > /home/svpb/svpb/logs/upcomingJobs.log  2>&1"
     - name: Cronjob for emailaing earlier
-      cron:
+      ansible.builtin.cron:
         name: "Send early emails for upcoming jobs"
         hour: "3"
         minute: "10"
@@ -174,7 +174,7 @@
         state: present
         job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py upcomingJob 5 >> /home/svpb/svpb/logs/upcomingJobs.log  2>&1"
     - name: Cronjob for leistungsreminder
-      cron:
+      ansible.builtin.cron:
         name: "Send emails to process Leistungsmeldungen"
         hour: "3"
         minute: "20"
@@ -194,13 +194,13 @@
     # static files in place:
     - name: Grant nginx access to svpb's home for serving static files
       remote_user: root
-      file:
+      ansible.builtin.file:
         path: ~svpb
         owner: svpb
         group: nginx
         mode: 0750
     - name: Ensure static directory exists
-      file:
+      ansible.builtin.file:
         dest: /home/svpb/svpb/static
         state: directory
         mode: 755
@@ -208,7 +208,7 @@
     # - name: Patch STATIC_ROOT in svpb settings
     #   replace: dest=/home/svpb/svpb/svpb/settings.py regexp="STATIC_ROOT = ''" replace="STATIC_ROOT = '{{ svpbhome }}/static'"
     - name: Run collectstatic
-      django_manage:
+      community.general.django_manage:
         command: collectstatic
         app_path: "{{ svpbhome }}"
         virtualenv: /home/svpb/svpb-venv
@@ -220,14 +220,14 @@
     #   replace: dest=/home/svpb/svpb/wsgi/svpb_nginx.conf regexp='svpbhome' replace='{{ svpbhome }}'
     # nginx config patches for local dev VM
     - name: Patch the svpb_nginx conf file - Disable SSL
-      replace:
+      ansible.builtin.replace:
         path: /home/svpb/svpb/wsgi/svpb_nginx.conf
         after: "# substitute your machine's IP address or FQDN"
         before: '    charset'
         regexp: '.*'
         replace: ''
     - name: Patch the svpb_nginx conf file - Allow access from localhost
-      replace:
+      ansible.builtin.replace:
         path: /home/svpb/svpb/wsgi/svpb_nginx.conf
         after: "server_name "
         before: ';'
@@ -235,7 +235,7 @@
         replace: '127.0.0.1'
     # symblink the just created config file
     - name: Symlink the svpb configuration file from nginx
-      file:
+      ansible.builtin.file:
         dest: /etc/nginx/conf.d/svpb_conf.conf
         src: /home/svpb/svpb/wsgi/svpb_nginx.conf
         state: link
@@ -249,7 +249,7 @@
     # - name: Set socket in uwsgi ini file
     #   ini_file: dest=/home/svpb/svpb/wsgi/uwsgi.ini section=uwsgi option=socket value=":8001"
     - name: Restart and enable nginx
-      service:
+      ansible.builtin.service:
         name: nginx
         state: restarted
         enabled: yes
@@ -262,7 +262,7 @@
   hosts: svpb
   tasks:
   - name: Place service file
-    copy:
+    ansible.builtin.copy:
       dest: /etc/systemd/system/svpb.service
       src: svpb.service
       owner: root
@@ -274,7 +274,7 @@
   hosts: svpb
   tasks:
     - name: Ensure start up of SVPB
-      service:
+      ansible.builtin.service:
         name: svpb
         state: restarted
         enabled: yes
@@ -314,7 +314,7 @@
   hosts: svpb
   tasks:
     - name: Check Medlung consistency regularly, cronjob
-      cron:
+      ansible.builtin.cron:
         name: "Meldung check"
         hour: "3"
         minute: "10"
@@ -322,7 +322,7 @@
         state: present
         job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py meldungConsistent > /home/svpb/svpb/logs/check.log  2>&1"
     - name: Yearend check, set Arbeitslast to default for newly joined members
-      cron:
+      ansible.builtin.cron:
         name: "Yearend check"
         hour: "23"
         minute: "0"
@@ -332,7 +332,7 @@
         state: present
         job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py yearendArbeitslast > /home/svpb/svpb/logs/yearend.log  2>&1"
     - name: Send reservation emails
-      cron:
+      ansible.builtin.cron:
         name: "Send reservation emails"
         minute: "12"
         user: svpb
