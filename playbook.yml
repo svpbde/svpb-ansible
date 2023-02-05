@@ -47,7 +47,7 @@
       ansible.builtin.service:
         name: postgresql
         state: restarted
-        enabled: yes
+        enabled: true
     - name: Ansible postgresdb requirements via dnf
       ansible.builtin.dnf:
         name: python3-psycopg2
@@ -64,7 +64,7 @@
         db: svpbdata
         name: svpbdb
         password: Eef1Aef3
-        encrypted: yes
+        encrypted: true
         priv: "ALL"
 
 
@@ -252,7 +252,7 @@
       ansible.builtin.service:
         name: nginx
         state: restarted
-        enabled: yes
+        enabled: true
       remote_user: root
     # start uwsgi happens via the svpb start!
   tags: nginx
@@ -277,7 +277,7 @@
       ansible.builtin.service:
         name: svpb
         state: restarted
-        enabled: yes
+        enabled: true
   tags: svpb
 
 # and finally, install the data fixtures. Not automated; this will highly depend on concrete setup
