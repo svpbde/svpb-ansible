@@ -14,8 +14,8 @@
   hosts: svpb
   tasks:
     - ansible.posix.selinux:
-    policy: targeted
-    state: permissive
+        policy: targeted
+        state: permissive
 
 
 - name: PostgresDB
@@ -49,9 +49,9 @@
         state: restarted
         enabled: yes
     - name: Ansible postgresdb requirements via dnf
-      dnf: name={{ item }} state=latest
-      with_items:
-        - python3-psycopg2
+      dnf:
+        name: python3-psycopg2
+        state: latest
     - name: Create Postgres DB
       become: true
       become_user: postgres
@@ -98,7 +98,9 @@
   remote_user: root
   tasks:
     - name: Basic software via dnf
-      dnf: name={{ item }} state=latest
+      dnf:
+        name: "{{ item }}"
+        state: latest
       with_items:
         - git
         - glibc-langpack-de
@@ -117,20 +119,38 @@
   hosts: svpb
   tasks:
     - name: Get the repository
-      git: repo=https://github.com/svpbde/svpb.git dest=/home/svpb/svpb update=false version=develop
+      git:
+        repo: https://github.com/svpbde/svpb.git
+        dest: /home/svpb/svpb
+        update: false
+        version: develop
     - name: Patch the settings file to use the Postgres DB
-      replace: dest=/home/svpb/svpb/svpb/settings.py regexp='django.db.backends.sqlite3' replace='django.db.backends.postgresql_psycopg2'
+      replace:
+        dest: /home/svpb/svpb/svpb/settings.py
+        regexp: 'django.db.backends.sqlite3'
+        replace: 'django.db.backends.postgresql_psycopg2'
     - name: Patch settings for DB name
-      replace: dest=/home/svpb/svpb/svpb/settings.py regexp="BASE_DIR / 'svpb.sq'" replace="'svpbdata'"
+      replace:
+        dest: /home/svpb/svpb/svpb/settings.py
+        regexp: "BASE_DIR / 'svpb.sq'"
+        replace: "'svpbdata'"
     - name: Patch settings for DB User account
-      replace: dest=/home/svpb/svpb/svpb/settings.py regexp='UserPlaceholder' replace='svpbdb'
+      replace:
+        dest: /home/svpb/svpb/svpb/settings.py
+        regexp: 'UserPlaceholder'
+        replace: 'svpbdb'
     - name: Patch settings for DB password
-      replace: dest=/home/svpb/svpb/svpb/settings.py regexp='PasswordPlaceholder' replace='Eef1Aef3'
+      replace: 
+        dest: /home/svpb/svpb/svpb/settings.py
+        regexp: 'PasswordPlaceholder'
+        replace: 'Eef1Aef3'
     # ToDo: Clever credential management with differentiation between production and test VM
     #- name: Copy email settings
     #  copy: src=~/c.prog/svpb/svpb/emailSettings.py dest=/home/svpb/svpb/svpb/emailSettings.py owner=svpb group=svpb mode=0600
     - name: Create logs directory
-      file: path=/home/svpb/svpb/logs state=directory
+      file: 
+        path: /home/svpb/svpb/logs
+        state: directory
     - name: Install python requirements via pip
       pip:
         requirements: /home/svpb/svpb/requirements.txt
@@ -138,11 +158,29 @@
     - name: Migrate the database
       shell: cd svpb ; /home/svpb/svpb-venv/bin/python3 manage.py migrate > logs/migrate.out 2> logs/migrate.err
     - name: Cronjob for emailing
-      cron: name="Send emails for upcoming jobs" hour="3" minute="0" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py upcomingJob 2 > /home/svpb/svpb/logs/upcomingJobs.log  2>&1"
+      cron:
+        name: "Send emails for upcoming jobs"
+        hour: "3"
+        minute: "0"
+        user: svpb
+        state: present
+        job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py upcomingJob 2 > /home/svpb/svpb/logs/upcomingJobs.log  2>&1"
     - name: Cronjob for emailaing earlier
-      cron: name="Send early emails for upcoming jobs" hour="3" minute="10" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py upcomingJob 5 >> /home/svpb/svpb/logs/upcomingJobs.log  2>&1"
+      cron:
+        name: "Send early emails for upcoming jobs"
+        hour: "3"
+        minute: "10"
+        user: svpb
+        state: present
+        job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py upcomingJob 5 >> /home/svpb/svpb/logs/upcomingJobs.log  2>&1"
     - name: Cronjob for leistungsreminder
-      cron: name="Send emails to process Leistungsmeldungen" hour="3" minute="20" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py reminderLeistungen > /home/svpb/svpb/logs/reminderLeistungen.log  2>&1"
+      cron:
+        name: "Send emails to process Leistungsmeldungen"
+        hour: "3"
+        minute: "20"
+        user: svpb
+        state: present
+        job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py reminderLeistungen > /home/svpb/svpb/logs/reminderLeistungen.log  2>&1"
   tags: svpb
 
 - name: Nginx configuration
@@ -162,12 +200,18 @@
         group: nginx
         mode: 0750
     - name: Ensure static directory exists
-      file:  dest=/home/svpb/svpb/static state=directory mode=755
+      file:
+        dest: /home/svpb/svpb/static
+        state: directory
+        mode: 755
     # Currently already hardcoded in git repo. ToDo: Evaluate if we want it configurable
     # - name: Patch STATIC_ROOT in svpb settings
     #   replace: dest=/home/svpb/svpb/svpb/settings.py regexp="STATIC_ROOT = ''" replace="STATIC_ROOT = '{{ svpbhome }}/static'"
     - name: Run collectstatic
-      django_manage:  command=collectstatic app_path="{{ svpbhome }}" virtualenv=/home/svpb/svpb-venv
+      django_manage:
+        command: collectstatic
+        app_path: "{{ svpbhome }}"
+        virtualenv: /home/svpb/svpb-venv
     # Currently already hardcoded in git repo. ToDo: Evaluate if we want it configurable
     # # prepare nginx configuration:
     # - name: Patch the svpb_nginx conf file from the default in the git repo FQDN
@@ -191,7 +235,10 @@
         replace: '127.0.0.1'
     # symblink the just created config file
     - name: Symlink the svpb configuration file from nginx
-      file: dest=/etc/nginx/conf.d/svpb_conf.conf src=/home/svpb/svpb/wsgi/svpb_nginx.conf state=link
+      file:
+        dest: /etc/nginx/conf.d/svpb_conf.conf
+        src: /home/svpb/svpb/wsgi/svpb_nginx.conf
+        state: link
       remote_user: root
     # Currently already hardcoded in git repo. ToDo: Evaluate if we want it configurable
     # # tweak the uwsgi ini file settings
@@ -202,7 +249,10 @@
     # - name: Set socket in uwsgi ini file
     #   ini_file: dest=/home/svpb/svpb/wsgi/uwsgi.ini section=uwsgi option=socket value=":8001"
     - name: Restart and enable nginx
-      service: name=nginx state=restarted enabled=yes
+      service:
+        name: nginx
+        state: restarted
+        enabled: yes
       remote_user: root
     # start uwsgi happens via the svpb start!
   tags: nginx
@@ -224,7 +274,10 @@
   hosts: svpb
   tasks:
     - name: Ensure start up of SVPB
-      service: name=svpb state=restarted enabled=yes
+      service:
+        name: svpb
+        state: restarted
+        enabled: yes
   tags: svpb
 
 # and finally, install the data fixtures. Not automated; this will highly depend on concrete setup
@@ -261,9 +314,28 @@
   hosts: svpb
   tasks:
     - name: Check Medlung consistency regularly, cronjob
-      cron: name="Meldung check" hour="3" minute="10" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py meldungConsistent > /home/svpb/svpb/logs/check.log  2>&1"
+      cron:
+        name: "Meldung check"
+        hour: "3"
+        minute: "10"
+        user: svpb
+        state: present
+        job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py meldungConsistent > /home/svpb/svpb/logs/check.log  2>&1"
     - name: Yearend check, set Arbeitslast to default for newly joined members
-      cron: name="Yearend check" hour="23" minute="0" day="31" month="12" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py yearendArbeitslast > /home/svpb/svpb/logs/yearend.log  2>&1"
+      cron:
+        name: "Yearend check"
+        hour: "23"
+        minute: "0"
+        day: "31"
+        month: "12"
+        user: svpb
+        state: present
+        job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py yearendArbeitslast > /home/svpb/svpb/logs/yearend.log  2>&1"
     - name: Send reservation emails
-      cron: name="Send reservation emails" minute="12" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py reservationEmails > /home/svpb/svpb/logs/reservation.emails.log 2>&1"
+      cron:
+        name: "Send reservation emails"
+        minute: "12"
+        user: svpb
+        state: present
+        job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py reservationEmails > /home/svpb/svpb/logs/reservation.emails.log 2>&1"
   tags: regular
