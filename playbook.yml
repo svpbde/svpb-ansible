@@ -211,7 +211,7 @@
       ansible.builtin.file:
         dest: /home/svpb/svpb/static
         state: directory
-        mode: 755
+        mode: 0755
     # Currently already hardcoded in git repo. ToDo: Evaluate if we want it configurable
     # - name: Patch STATIC_ROOT in svpb settings
     #   replace: dest=/home/svpb/svpb/svpb/settings.py regexp="STATIC_ROOT = ''" replace="STATIC_ROOT = '{{ svpbhome }}/static'"
