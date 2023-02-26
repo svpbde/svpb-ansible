@@ -80,6 +80,12 @@
         generate_ssh_key: true
         state: present
         shell: /bin/bash
+    - name: Fix home permissions (due to synced folder config created as root)
+      ansible.builtin.file:
+        path: ~svpb
+        owner: svpb
+        group: svpb
+        mode: 0700
     # - action: copy src=~/.ssh/id_rsa.pub dest=/home/svpb/.ssh/authorized_keys owner=svpb group=svpb mode=0600
     # Instead of adding own public key (line above) allow access for vagrant's
     # ssh key, which is already authorized for root
