@@ -26,6 +26,11 @@ sudo apt install vagrant-libvirt libvirt-daemon-system qemu-system-x86
 sudo usermod -a -G libvirt <YOUR USERNAME>
 ```
 
+If you want to move files between guest and host, install the plugin vagrant-scp
+```
+vagrant plugin install vagrant-scp
+```
+
 Usage
 -----
 ```
@@ -34,6 +39,8 @@ vagrant up
 ```
 This automatically runs every step required to get a working VM.
 You can connect to it with ```vagrant ssh```.
+The synced folder `svpb` created in this directory mirrors the content of `/home/svpb/svpb`, i.e. you can edit the files in this directroy directly from your host system.
+You can also use `vagrant-scp` to copy files between host and guest.
 To manually run an ansible playbook, e.g. `provision.yml` to pull the latest version from github, use (as mentioned in [ansible's doc](https://docs.ansible.com/ansible/latest/scenario_guides/guide_vagrant.html#running-ansible-manually))
 ```
 ansible-playbook -i .vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory provision.yml
