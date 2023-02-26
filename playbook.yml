@@ -315,6 +315,22 @@
         enabled: true
   tags: svpb
 
+# Note: Generating class diagrams for documentation is not needed frequently,
+# the following can be skipped
+- name: Dependencies to generate class diagrams
+  hosts: svpb
+  tasks:
+    - name: Install graphviz
+      remote_user: root
+      ansible.builtin.dnf:
+        name: graphviz
+        state: latest
+    - name: Install pydot
+      remote_user: svpb
+      ansible.builtin.pip:
+        name: pydot
+        virtualenv: /home/svpb/svpb-venv
+
 # and finally, install the data fixtures. Not automated; this will highly depend on concrete setup
 
 ## get the backup process in place: install dropbox, install the crontab
