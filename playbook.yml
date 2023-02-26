@@ -25,7 +25,7 @@
   tasks:
     - name: Install postgresql
       ansible.builtin.dnf:
-        name: postgresql-server
+        name: '@postgresql:13/server'
         state: latest
     - name: Check if postgresql needs init
       ansible.builtin.stat:
@@ -118,7 +118,7 @@
         - python3-pip
         - python3-virtualenv
         # - ccrypt  # was used for backup encryption, needs rework
-        - nginx
+        - '@nginx:1.22/common'
   tags: software
 
 
