@@ -119,6 +119,27 @@
         - python3-virtualenv
         # - ccrypt  # was used for backup encryption, needs rework
         - '@nginx:1.22/common'
+    - name: LaTeX requirements for sphinx and generation of new member letters
+      ansible.builtin.dnf:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - texlive-collection-fontsrecommended
+        - texlive-collection-latex
+        - texlive-babel-german
+        - texlive-capt-of
+        - texlive-cmap
+        - texlive-fncychap
+        - texlive-framed
+        - texlive-needspace
+        - texlive-parskip
+        - texlive-tabulary
+        - texlive-titlesec
+        - texlive-upquote
+        - texlive-wrapfig
+        - latexmk
+        - texlive-german
+        - texlive-euenc
   tags: software
 
 
