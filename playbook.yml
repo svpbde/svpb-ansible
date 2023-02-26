@@ -26,7 +26,7 @@
     - name: Install postgresql
       ansible.builtin.dnf:
         name: '@postgresql:13/server'
-        state: latest
+        state: present
     - name: Check if postgresql needs init
       ansible.builtin.stat:
         path: /var/lib/pgsql/data/PG_VERSION
@@ -108,7 +108,7 @@
     - name: Basic software via dnf
       ansible.builtin.dnf:
         name: "{{ item }}"
-        state: latest
+        state: present
       with_items:
         - git
         - glibc-langpack-de
