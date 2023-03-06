@@ -3,14 +3,12 @@
 # An Ansible playbook to install the SVPB Web application on a Linux machine
 # Assumptions:
 # - dnf-based system; tested on CentOS 8 Stream
-# - root access has been ensured by copying the public key of the user running
-#   this playbook to ~root/.ssh/authorized_keys
 # Currently only intended for tests in a local VM with vagrant, not tested in
 # production.
 
 
 - name: Configure SELinux
-  remote_user: root
+  become: true
   hosts: svpb
   tasks:
     - name: Put SELinux in permissive mode, logging actions that would be blocked.
@@ -20,7 +18,7 @@
 
 
 - name: PostgresDB
-  remote_user: root
+  become: true
   hosts: svpb
   tasks:
     - name: Install postgresql
@@ -71,7 +69,7 @@
 
 - name: CreateSVPB-User
   hosts: svpb
-  remote_user: root
+  become: true
   tasks:
     - name: Ensure svpb user exists
       ansible.builtin.user:
@@ -86,30 +84,11 @@
         owner: svpb
         group: svpb
         mode: 0700
-    # - action: copy src=~/.ssh/id_rsa.pub dest=/home/svpb/.ssh/authorized_keys owner=svpb group=svpb mode=0600
-    # Instead of adding own public key (line above) allow access for vagrant's
-    # ssh key, which is already authorized for root
-    - name: Ensure svpb's .ssh directory exists
-      ansible.builtin.file:
-        path: ~svpb/.ssh
-        state: directory
-        owner: svpb
-        group: svpb
-        mode: 0700
-    - name: Copy root's authorized_keys to svpb user
-      ansible.builtin.copy:
-        src: /root/.ssh/authorized_keys
-        dest: ~svpb/.ssh/authorized_keys
-        owner: svpb
-        group: svpb
-        mode: 0700
-        force: false
-        remote_src: true
 
 
 - name: Basic software installation
   hosts: svpb
-  remote_user: root
+  become: true
   tasks:
     - name: Basic software via dnf
       ansible.builtin.dnf:
@@ -150,7 +129,8 @@
 
 
 - name: GetSVPB
-  remote_user: svpb
+  become: true
+  become_user: svpb
   hosts: svpb
   tasks:
     - name: Get the repository
@@ -191,7 +171,10 @@
         requirements: /home/svpb/svpb/requirements.txt
         virtualenv: /home/svpb/svpb-venv
     - name: Migrate the database
-      ansible.builtin.shell: cd svpb ; /home/svpb/svpb-venv/bin/python3 manage.py migrate > logs/migrate.out 2> logs/migrate.err
+      community.general.django_manage:
+        command: migrate
+        app_path: /home/svpb/svpb
+        virtualenv: /home/svpb/svpb-venv
     - name: Cronjob for emailing
       ansible.builtin.cron:
         name: "Send emails for upcoming jobs"
@@ -220,7 +203,8 @@
 
 - name: Nginx configuration
   # Compare http://uwsgi-docs.readthedocs.org/en/latest/tutorials/Django_and_nginx.html
-  remote_user: svpb
+  become: true
+  become_user: svpb
   hosts: svpb
   vars:
     svpbhome: /home/svpb/svpb
@@ -228,7 +212,8 @@
   tasks:
     # static files in place:
     - name: Grant nginx access to svpb's home for serving static files
-      remote_user: root
+      become: true
+      become_user: root
       ansible.builtin.file:
         path: ~svpb
         owner: svpb
@@ -270,11 +255,12 @@
         replace: '127.0.0.1'
     # symblink the just created config file
     - name: Symlink the svpb configuration file from nginx
+      become: true
+      become_user: root
       ansible.builtin.file:
         dest: /etc/nginx/conf.d/svpb_conf.conf
         src: /home/svpb/svpb/wsgi/svpb_nginx.conf
         state: link
-      remote_user: root
     # Currently already hardcoded in git repo. ToDo: Evaluate if we want it configurable
     # # tweak the uwsgi ini file settings
     # - name: Set chdir in uwsgi ini file
@@ -284,28 +270,29 @@
     # - name: Set socket in uwsgi ini file
     #   ini_file: dest=/home/svpb/svpb/wsgi/uwsgi.ini section=uwsgi option=socket value=":8001"
     - name: Restart and enable nginx
+      become: true
+      become_user: root
       ansible.builtin.service:
         name: nginx
         state: restarted
         enabled: true
-      remote_user: root
     # start uwsgi happens via the svpb start!
   tags: nginx
 
 - name: Setup svpb service with systemd
-  remote_user: root
+  become: true
   hosts: svpb
   tasks:
-  - name: Place service file
-    ansible.builtin.copy:
-      dest: /etc/systemd/system/svpb.service
-      src: svpb.service
-      owner: root
-      group: root
+    - name: Place service file
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/svpb.service
+        src: svpb.service
+        owner: root
+        group: root
 
 - name: StartSVPB
   # this actually starts uwsgi!
-  remote_user: root
+  become: true
   hosts: svpb
   tasks:
     - name: Ensure start up of SVPB
@@ -321,12 +308,14 @@
   hosts: svpb
   tasks:
     - name: Install graphviz
-      remote_user: root
+      become: true
+      become_user: root
       ansible.builtin.dnf:
         name: graphviz
         state: latest
     - name: Install pydot
-      remote_user: svpb
+      become: true
+      become_user: svpb
       ansible.builtin.pip:
         name: pydot
         virtualenv: /home/svpb/svpb-venv
@@ -361,7 +350,8 @@
 
 - name: Regular jobs
   # check consistency, later on: send out emails
-  remote_user: svpb
+  become: true
+  become_user: svpb
   hosts: svpb
   tasks:
     - name: Check Medlung consistency regularly, cronjob
