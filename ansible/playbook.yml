@@ -102,7 +102,6 @@
         - libjpeg-devel # needed to build Pillow
         - python3-pip
         - python3-virtualenv
-        # - ccrypt  # was used for backup encryption, needs rework
         - '@nginx:1.22/common'
     - name: LaTeX requirements for sphinx and generation of new member letters
       ansible.builtin.dnf:
@@ -159,9 +158,6 @@
         dest: /home/svpb/svpb/svpb/settings.py
         regexp: 'PasswordPlaceholder'
         replace: 'Eef1Aef3'
-    # ToDo: Clever credential management with differentiation between production and test VM
-    # - name: Copy email settings
-    #   copy: src=~/c.prog/svpb/svpb/emailSettings.py dest=/home/svpb/svpb/svpb/emailSettings.py owner=svpb group=svpb mode=0600
     - name: Create logs directory
       ansible.builtin.file:
         path: /home/svpb/svpb/logs
@@ -224,20 +220,11 @@
         dest: /home/svpb/svpb/static
         state: directory
         mode: 0755
-    # Currently already hardcoded in git repo. ToDo: Evaluate if we want it configurable
-    # - name: Patch STATIC_ROOT in svpb settings
-    #   replace: dest=/home/svpb/svpb/svpb/settings.py regexp="STATIC_ROOT = ''" replace="STATIC_ROOT = '{{ svpbhome }}/static'"
     - name: Run collectstatic
       community.general.django_manage:
         command: collectstatic
         app_path: "{{ svpbhome }}"
         virtualenv: /home/svpb/svpb-venv
-    # Currently already hardcoded in git repo. ToDo: Evaluate if we want it configurable
-    # # prepare nginx configuration:
-    # - name: Patch the svpb_nginx conf file from the default in the git repo FQDN
-    #   replace: dest=/home/svpb/svpb/wsgi/svpb_nginx.conf regexp='svpbfqdn' replace='{{ svpbfqdn }}'
-    # - name: Patch the svpb_nginx conf file from the default in the git repo Home
-    #   replace: dest=/home/svpb/svpb/wsgi/svpb_nginx.conf regexp='svpbhome' replace='{{ svpbhome }}'
     # nginx config patches for local dev VM
     - name: Patch the svpb_nginx conf file - Disable SSL
       ansible.builtin.replace:
@@ -261,14 +248,6 @@
         dest: /etc/nginx/conf.d/svpb_conf.conf
         src: /home/svpb/svpb/wsgi/svpb_nginx.conf
         state: link
-    # Currently already hardcoded in git repo. ToDo: Evaluate if we want it configurable
-    # # tweak the uwsgi ini file settings
-    # - name: Set chdir in uwsgi ini file
-    #   ini_file: dest=/home/svpb/svpb/wsgi/uwsgi.ini section=uwsgi option=chdir value=/home/svpb/svpb
-    # - name: Set module in uwsgi ini file
-    #   ini_file: dest=/home/svpb/svpb/wsgi/uwsgi.ini section=uwsgi option=module value=svpb.wsgi
-    # - name: Set socket in uwsgi ini file
-    #   ini_file: dest=/home/svpb/svpb/wsgi/uwsgi.ini section=uwsgi option=socket value=":8001"
     - name: Restart and enable nginx
       become: true
       become_user: root
@@ -320,33 +299,6 @@
         name: pydot
         virtualenv: /home/svpb/svpb-venv
 
-# and finally, install the data fixtures. Not automated; this will highly depend on concrete setup
-
-## get the backup process in place: install dropbox, install the crontab
-# ToDo: Find a fitting backup solution
-# - name: Backup process
-#   remote_user: svpb
-#   hosts: svpb
-#   vars:
-#     dropboxuser: svpb
-#   tasks:
-#     # - name: Download dropbox
-#     #   get_url: url=https://www.dropbox.com/download?plat=lnx.x86 dest=/home/svpb
-#     # CareFUL: dropxbox needs manual intervention; local access to a url
-#     - name: Put encrpytion password for dropbox in place
-#       replace: dest=/home/svpb/svpb/dump.sh regexp=XXXX replace=uRohX5aeyei4Xoov
-#     - name: Cronjob for backup
-#       cron: name="backup SVPB" hour="3" minute="5" user=svpb state=present job="cd /home/svpb/svpb ; /home/svpb/svpb/dump.sh > /home/svpb/svpb/logs/dump.log 2>&1"
-#     - name: Install dropbox init script
-#       template: src=./dropbox.conf dest=/etc/init.d/dropbox mode=0755
-#       remote_user: root
-#     - name: Startup dropxbox service
-#       service: name=dropbox state=restarted enabled=yes
-#       remote_user: root
-#       register: dropboxStartOutput
-#     - name: Debug output from Dropbox service start
-#       debug: var=dropboxStartOutput
-#   tags: backup
 
 - name: Regular jobs
   # check consistency, later on: send out emails
