@@ -43,7 +43,6 @@ Now you can
 Feel free to poke around and destroy everything, starting over just takes a 
 couple of minutes.
 
-
 Using qemu instead of virtualbox
 --------------------------------
 If it is not possible to use virtualbox (e.g. due to problems with the
@@ -55,3 +54,16 @@ in connection with
 sudo apt install vagrant-libvirt libvirt-daemon-system qemu-system-x86
 sudo usermod -a -G libvirt <YOUR USERNAME>
 ```
+
+CentOS peculiarities
+--------------------
+CentOS has some peculiarities compared to e.g. Debian.
+Some are listed below for anyone interested in diving into CentOS.
+* Old default python version (currently 3.6, EOL Dec 2021)
+  * Note that security updates are still provided by RedHat (longer than by
+    official Python devs)
+* [SELinux](https://www.redhat.com/en/topics/linux/what-is-selinux)
+* Concept of *modules* (different versions of the same package installable
+  via package manager)
+* Not-so-nice texlive packages (incomplete and fine-grained, i.e. on package
+  level instead of collections like texlive-science found on other systems)
