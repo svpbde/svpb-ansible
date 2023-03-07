@@ -35,6 +35,7 @@ Now you can
 * edit the content of the directory `svpb` from your host system, it's a
   synced directory and mirrors the content of `/home/svpb/svpb`.
 * connect to the VM with `vagrant ssh`
+  * this logs you in as user vagrant, run `sudo -u svpb -i` to become user svpb
 * shutdown the VM with `vagrant halt`
 * start over with `vagrant destroy` & another run of `vagrant up` (delete
   the `svpb` directory if you do not want to keep your changes)
