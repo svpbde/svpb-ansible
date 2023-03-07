@@ -40,6 +40,10 @@ Now you can
 * start over with `vagrant destroy` & another run of `vagrant up` (delete
   the `svpb` directory if you do not want to keep your changes)
 * use `vagrant-scp` to copy files between host and guest
+* use `vagrant provision` to run the ansible playbook again
+
+Ensure you are inside this directory (where the Vagrantfile is located) when
+calling vagrant commands, else it doesn't know which VM to control.
 
 Feel free to poke around and destroy everything, starting over just takes a 
 couple of minutes.
