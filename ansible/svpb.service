@@ -4,9 +4,7 @@ After=syslog.target
 
 [Service]
 WorkingDirectory=/home/svpb/svpb
-ExecStart=/home/svpb/svpb-venv/bin/uwsgi \
-          --ini /home/svpb/svpb/wsgi/uwsgi.ini \
-          --die-on-term
+ExecStart=/home/svpb/svpb-venv/bin/uwsgi --ini /home/svpb/svpb/wsgi/uwsgi.ini --die-on-term
 User=svpb
 Group=svpb
 Restart=on-failure
