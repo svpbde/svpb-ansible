@@ -20,14 +20,19 @@ Dependencies
   See below for an alternative.
 * If you want to move files between guest and host, install the plugin 
   vagrant-scp with `vagrant plugin install vagrant-scp`
+* [git](https://git-scm.org/downloads)
+  * On a debian-based system: `sudo apt install git`
+* Configure your github account: To be able to use git from the command line, you either have to [generate and add an SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) or [setup a personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) in your account.
+*"Password-based authentication for Git has been removed in favor of more secure authentication methods."* (quoted from [here](https://docs.github.com/en/get-started/getting-started-with-git/about-remote-repositories#cloning-with-https-urls)), i.e. you cannot use the password you login to the github website with.
 
 Usage
 -----
-```
-git clone https://github.com/svpbde/svpb-ansible
-cd svpb-ansible
-vagrant up
-```
+1. Clone this repo
+    * If you're using ssh-based authentication: `git clone git@github.com:svpbde/svpb-ansible.git`
+    * If you're using an access token: `git clone https://github.com/svpbde/svpb-ansible.git`
+2. `cd svpb-ansible`
+3. `vagrant up`
+
 This automatically runs every step required to get a working VM.
 
 Now you can
