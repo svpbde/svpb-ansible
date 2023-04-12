@@ -84,6 +84,13 @@
         owner: svpb
         group: svpb
         mode: 0700
+    - name: Allow svpb to sudo without password (DO NEVER RUN THIS IN PRODUCTION)
+      community.general.sudoers:
+        name: svpb-user
+        user: svpb
+        runas: ALL
+        commands: ALL
+        nopassword: true
 
 
 - name: Basic software installation
