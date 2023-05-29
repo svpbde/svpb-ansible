@@ -62,7 +62,7 @@
       community.postgresql.postgresql_user:
         db: svpbdata
         name: svpbdb
-        password: Eef1Aef3
+        password: exyn9pwZvyJRDEjYQpuH
         encrypted: true
         priv: "ALL"
 
@@ -145,26 +145,16 @@
         dest: /home/svpb/svpb
         update: false
         version: develop
-    - name: Patch the settings file to use the Postgres DB
+    - name: Patch manage.py to use the VM settings file
       ansible.builtin.replace:
-        dest: /home/svpb/svpb/svpb/settings.py
-        regexp: 'django.db.backends.sqlite3'
-        replace: 'django.db.backends.postgresql_psycopg2'
-    - name: Patch settings for DB name
+        dest: /home/svpb/svpb/manage.py
+        regexp: 'settings.local'
+        replace: 'settings.vm'
+    - name: Patch wsgi.py to use the VM settings file
       ansible.builtin.replace:
-        dest: /home/svpb/svpb/svpb/settings.py
-        regexp: "BASE_DIR / 'svpb.sq'"
-        replace: "'svpbdata'"
-    - name: Patch settings for DB User account
-      ansible.builtin.replace:
-        dest: /home/svpb/svpb/svpb/settings.py
-        regexp: 'UserPlaceholder'
-        replace: 'svpbdb'
-    - name: Patch settings for DB password
-      ansible.builtin.replace:
-        dest: /home/svpb/svpb/svpb/settings.py
-        regexp: 'PasswordPlaceholder'
-        replace: 'Eef1Aef3'
+        dest: /home/svpb/svpb/svpb/wsgi.py
+        regexp: 'settings.production'
+        replace: 'settings.vm'
     - name: Create logs directory
       ansible.builtin.file:
         path: /home/svpb/svpb/logs
