@@ -7,10 +7,6 @@ It strives to mirror the production server as close as possible.
 Thus, the ansible playbook also serves as a guideline how to setup the
 production server.
 
-This repo should stay private due to the credentials included.
-Nevertheless, the credentials were already published on the old master branch.
-Credential management still has to be improved.
-
 Dependencies
 ------------
 * [vagrant](https://developer.hashicorp.com/vagrant/downloads)
