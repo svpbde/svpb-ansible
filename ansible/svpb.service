@@ -10,7 +10,6 @@ Group=svpb
 Restart=on-failure
 KillSignal=SIGTERM
 Type=notify
-StandardError=syslog
 NotifyAccess=all
 
 [Install]
