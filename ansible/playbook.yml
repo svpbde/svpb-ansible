@@ -3,8 +3,8 @@
 # An Ansible playbook to install the SVPB Web application on a Linux machine
 # Assumptions:
 # - dnf-based system; tested on CentOS 8 Stream
-# Currently only intended for tests in a local VM with vagrant, not tested in
-# production.
+# Currently only intended for tests in a local VM with vagrant.
+# Not tested in production. Production would need a more secure configuration.
 
 
 - name: Configure SELinux
@@ -62,7 +62,7 @@
       community.postgresql.postgresql_user:
         db: svpbdata
         name: svpbdb
-        password: exyn9pwZvyJRDEjYQpuH
+        password: exyn9pwZvyJRDEjYQpuH  # For development only (same as in svpb/settings/vm.py)
         encrypted: true
         priv: "ALL"
 
