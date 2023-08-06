@@ -194,6 +194,14 @@
         user: svpb
         state: present
         job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py reminderLeistungen > /home/svpb/svpb/logs/reminderLeistungen.log  2>&1"
+    - name: Cronjob clearing expired sessions
+      ansible.builtin.cron:
+        name: "Clear expired sessions from database"
+        hour: "3"
+        minute: "30"
+        user: svpb
+        state: present
+        job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py clearsessions > /home/svpb/svpb/logs/clearsessions.log  2>&1"
   tags: svpb
 
 - name: Nginx configuration
