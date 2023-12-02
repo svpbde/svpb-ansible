@@ -9,23 +9,24 @@ production server.
 
 Dependencies
 ------------
+Please install the following dependencies:
 * [vagrant](https://developer.hashicorp.com/vagrant/downloads)
   * On a debian-based system: `sudo apt install vagrant`
 * Vagrant relies on a virtualisation software being installed.
   [virtualbox](https://www.virtualbox.org/) is recommended.
-  See below for an alternative.
+  See below for an alternative (qemu).
 * If you want to move files between guest and host, install the plugin 
   vagrant-scp with `vagrant plugin install vagrant-scp`
 * [git](https://git-scm.org/downloads)
   * On a debian-based system: `sudo apt install git`
-* Configure your github account: To be able to use git from the command line, you either have to [generate and add an SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) or [setup a personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) in your account.
-*"Password-based authentication for Git has been removed in favor of more secure authentication methods."* (quoted from [here](https://docs.github.com/en/get-started/getting-started-with-git/about-remote-repositories#cloning-with-https-urls)), i.e. you cannot use the password you login to the github website with.
+
+Only if you want to push changes to GitHub:
+* Configure your GitHub account: To be able to push changes, you either have to [generate and add an SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) or [setup a personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) in your account.
+*"Password-based authentication for Git has been removed in favor of more secure authentication methods."* (quoted from [here](https://docs.github.com/en/get-started/getting-started-with-git/about-remote-repositories#cloning-with-https-urls)), i.e. you cannot use the password you login to the GitHub website with.
 
 Usage
 -----
 1. Clone this repo
-    * If you're using ssh-based authentication: `git clone git@github.com:svpbde/svpb-ansible.git`
-    * If you're using an access token: `git clone https://github.com/svpbde/svpb-ansible.git`
 2. `cd svpb-ansible`
 3. `vagrant up`
 
