@@ -170,6 +170,22 @@
         command: migrate
         app_path: /home/svpb/svpb
         virtualenv: /home/svpb/svpb-venv
+    - name: Cronjob for queued mails
+      ansible.builtin.cron:
+        name: "Send queued mails"
+        hour: "*"
+        minute: "*"
+        user: svpb
+        state: present
+        job: "cd /home/svpb/svpb; /home/svpb/svpb-venv/bin/python3 manage.py send_queued_mail > /home/svpb/svpb/logs/send_queued_mail.log 2>&1"
+    - name: Cronjob for deleting mails older than 90 days
+      ansible.builtin.cron:
+        name: "Delete mails older than 90 days"
+        hour: "2"
+        minute: "0"
+        user: svpb
+        state: present
+        job: "cd /home/svpb/svpb; /home/svpb/svpb-venv/bin/python3 manage.py cleanup_mail --days 90 --delete-attachements > /home/svpb/svpb/logs/cleanup_mail.log 2>&1"
     - name: Cronjob for emailing
       ansible.builtin.cron:
         name: "Send emails for upcoming jobs"
@@ -178,7 +194,7 @@
         user: svpb
         state: present
         job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py upcomingJob 2 > /home/svpb/svpb/logs/upcomingJobs.log  2>&1"
-    - name: Cronjob for emailaing earlier
+    - name: Cronjob for emailing earlier
       ansible.builtin.cron:
         name: "Send early emails for upcoming jobs"
         hour: "3"
