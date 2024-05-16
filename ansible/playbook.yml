@@ -23,7 +23,7 @@
   tasks:
     - name: Install postgresql
       ansible.builtin.dnf:
-        name: '@postgresql:13/server'
+        name: '@postgresql:16/server'
         state: present
     - name: Check if postgresql needs init
       ansible.builtin.stat:
@@ -64,7 +64,24 @@
         name: svpbdb
         password: exyn9pwZvyJRDEjYQpuH  # For development only (same as in svpb/settings/vm.py)
         encrypted: true
-        priv: "ALL"
+    - name: Set Postgres permissions for database
+      become: true
+      become_user: postgres
+      community.postgresql.postgresql_privs:
+        db: svpbdata
+        privs: ALL
+        type: database
+        objs: svpbdata
+        role: svpbdb
+    - name: Set Postgres permissions for schema
+      become: true
+      become_user: postgres
+      community.postgresql.postgresql_privs:
+        db: svpbdata
+        privs: USAGE,CREATE
+        type: schema
+        objs: public
+        role: svpbdb
 
 
 - name: CreateSVPB-User
@@ -104,13 +121,11 @@
       with_items:
         - git
         - glibc-langpack-de
-        - python39
-        - python39-devel # needed to build Pillow
+        - python3-devel # needed to build Pillow
         - zlib-devel # needed to build Pillow
         - libjpeg-devel # needed to build Pillow
-        - python39-pip
-        - python3-virtualenv
-        - '@nginx:1.22/common'
+        - python3-pip
+        - '@nginx:1.24/common'
     - name: LaTeX requirements for sphinx and generation of new member letters
       ansible.builtin.dnf:
         name: "{{ item }}"
@@ -164,7 +179,7 @@
       ansible.builtin.pip:
         requirements: /home/svpb/svpb/requirements.txt
         virtualenv: /home/svpb/svpb-venv
-        virtualenv_python: python3.9
+        virtualenv_command: python3 -m venv
     - name: Migrate the database
       community.general.django_manage:
         command: migrate
