@@ -51,4 +51,12 @@ Vagrant.configure("2") do |config|
     ansible.playbook = "playbook.yml"
   end
 
+  # Workaround to ensure services are running
+  # They fail to start due to mounts not being present on system startup.
+  # Trying to define dependencies directly in the systemd service file did not
+  # work. However, this hack has the advantage of only being run when vagrant
+  # is used, thus there's no need to alter files which look different in production.
+  # https://serverfault.com/questions/808239/systemd-vagrant-and-virtualbox-wait-for-synced-folder-to-mount
+  config.vm.provision "shell", run: "always", inline: "sudo systemctl restart nginx svpb"
+
 end
