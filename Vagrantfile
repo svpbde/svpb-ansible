@@ -11,7 +11,7 @@ Vagrant.configure("2") do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
-  config.vm.box = "generic/centos9s"
+  config.vm.box = "almalinux/9"
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine and only allow access
@@ -25,7 +25,8 @@ Vagrant.configure("2") do |config|
     vb.gui = false
 
     # Customize the amount of memory on the VM:
-    vb.memory = "1024"
+    vb.memory = "2048"
+    vb.cpus = "2"
 
     config.vm.synced_folder "svpb", "/home/svpb/svpb", create: true
     config.vm.synced_folder "ansible", "/home/vagrant/ansible", create: true
@@ -33,7 +34,8 @@ Vagrant.configure("2") do |config|
 
   # Same settings for libvirt provider (used if virtualbox is not installed)
   config.vm.provider "libvirt" do |v|
-    v.memory = 1024
+    v.memory = 2048
+    v.cpus = 2
 
     config.vm.synced_folder "svpb", "/home/svpb/svpb", create: true, nfs_version: 4.2, nfs_udp: false
     config.vm.synced_folder "ansible", "/home/vagrant/ansible", create: true, nfs_version: 4.2, nfs_udp: false

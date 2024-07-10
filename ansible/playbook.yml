@@ -119,6 +119,7 @@
         name: "{{ item }}"
         state: present
       with_items:
+        - gcc # needed to build uwsgi
         - git
         - glibc-langpack-de
         - python3-devel # needed to build Pillow
