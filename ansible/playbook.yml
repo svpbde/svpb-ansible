@@ -23,7 +23,7 @@
   tasks:
     - name: Install postgresql
       ansible.builtin.dnf:
-        name: '@postgresql:16/server'
+        name: 'postgresql-server'
         state: present
     - name: Check if postgresql needs init
       ansible.builtin.stat:
@@ -72,15 +72,6 @@
         privs: ALL
         type: database
         objs: svpbdata
-        role: svpbdb
-    - name: Set Postgres permissions for schema
-      become: true
-      become_user: postgres
-      community.postgresql.postgresql_privs:
-        db: svpbdata
-        privs: USAGE,CREATE
-        type: schema
-        objs: public
         role: svpbdb
 
 
