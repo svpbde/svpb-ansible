@@ -192,7 +192,7 @@
         minute: "0"
         user: svpb
         state: present
-        job: "cd /home/svpb/svpb; /home/svpb/svpb-venv/bin/python3 manage.py cleanup_mail --days 90 --delete-attachements > /home/svpb/svpb/logs/cleanup_mail.log 2>&1"
+        job: "cd /home/svpb/svpb; /home/svpb/svpb-venv/bin/python3 manage.py cleanup_mail --days 90 --delete-attachments > /home/svpb/svpb/logs/cleanup_mail.log 2>&1"
     - name: Cronjob for emailing
       ansible.builtin.cron:
         name: "Send emails for upcoming jobs"
