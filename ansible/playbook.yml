@@ -268,7 +268,7 @@
         path: /home/svpb/svpb/wsgi/svpb_nginx.conf
         after: "server_name "
         before: ';'
-        regexp: '.*'
+        regexp: '.+'
         replace: '127.0.0.1'
     # symblink the just created config file
     - name: Symlink the svpb configuration file from nginx
