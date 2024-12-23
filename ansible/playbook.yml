@@ -342,7 +342,7 @@
         hour: "3"
         minute: "10"
         user: svpb
-        state: present
+        state: absent
         job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py meldungConsistent > /home/svpb/svpb/logs/check.log  2>&1"
     - name: Yearend check, set Arbeitslast to default for newly joined members
       ansible.builtin.cron:
@@ -352,7 +352,7 @@
         day: "31"
         month: "12"
         user: svpb
-        state: present
+        state: absent
         job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py yearendArbeitslast > /home/svpb/svpb/logs/yearend.log  2>&1"
     - name: Send reservation emails
       ansible.builtin.cron:
