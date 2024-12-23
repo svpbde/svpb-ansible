@@ -225,6 +225,14 @@
         user: svpb
         state: present
         job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py clearsessions > /home/svpb/svpb/logs/clearsessions.log  2>&1"
+    - name: Cronjob sending pending notifications about changed assignments
+      ansible.builtin.cron:
+        name: "Send pending notifications about changed assignments"
+        hour: "3"
+        minute: "40"
+        user: svpb
+        state: present
+        job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py notify_about_assignments > /home/svpb/svpb/logs/notify_about_assignments.log  2>&1"
   tags: svpb
 
 - name: Nginx configuration
