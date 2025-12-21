@@ -200,7 +200,7 @@
         minute: "0"
         user: svpb
         state: present
-        job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py upcomingJob 2 > /home/svpb/svpb/logs/upcomingJobs.log  2>&1"
+        job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py notify_about_upcoming_jobs 2 > /home/svpb/svpb/logs/notify_about_upcoming_jobs.log  2>&1"
     - name: Cronjob for emailing earlier
       ansible.builtin.cron:
         name: "Send early emails for upcoming jobs"
@@ -208,7 +208,7 @@
         minute: "10"
         user: svpb
         state: present
-        job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py upcomingJob 5 >> /home/svpb/svpb/logs/upcomingJobs.log  2>&1"
+        job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py notify_about_upcoming_jobs 5 >> /home/svpb/svpb/logs/notify_about_upcoming_jobs.log  2>&1"
     - name: Cronjob for leistungsreminder
       ansible.builtin.cron:
         name: "Send emails to process Leistungsmeldungen"
@@ -216,7 +216,7 @@
         minute: "20"
         user: svpb
         state: present
-        job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py reminderLeistungen > /home/svpb/svpb/logs/reminderLeistungen.log  2>&1"
+        job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py notify_about_pending_leistungen > /home/svpb/svpb/logs/notify_about_pending_leistungen.log  2>&1"
     - name: Cronjob clearing expired sessions
       ansible.builtin.cron:
         name: "Clear expired sessions from database"
@@ -344,29 +344,12 @@
   become_user: svpb
   hosts: svpb
   tasks:
-    - name: Check Medlung consistency regularly, cronjob
+    - name: Check Meldung consistency regularly, cronjob
       ansible.builtin.cron:
         name: "Meldung check"
         hour: "3"
         minute: "10"
         user: svpb
-        state: absent
-        job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py meldungConsistent > /home/svpb/svpb/logs/check.log  2>&1"
-    - name: Yearend check, set Arbeitslast to default for newly joined members
-      ansible.builtin.cron:
-        name: "Yearend check"
-        hour: "23"
-        minute: "0"
-        day: "31"
-        month: "12"
-        user: svpb
-        state: absent
-        job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py yearendArbeitslast > /home/svpb/svpb/logs/yearend.log  2>&1"
-    - name: Send reservation emails
-      ansible.builtin.cron:
-        name: "Send reservation emails"
-        minute: "12"
-        user: svpb
         state: present
-        job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py reservationEmails > /home/svpb/svpb/logs/reservation.emails.log 2>&1"
+        job: "cd /home/svpb/svpb ; /home/svpb/svpb-venv/bin/python3 manage.py check_meldung_consistency > /home/svpb/svpb/logs/check_meldung_consistency.log  2>&1"
   tags: regular
