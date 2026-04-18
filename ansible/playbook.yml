@@ -48,6 +48,8 @@
         state: restarted
         enabled: true
     - name: Ansible postgresdb requirements via dnf
+      # Note that this psycopg2 version is only used by ansible, the SVPB app get's its
+      # own version installed in a virtual environment
       ansible.builtin.dnf:
         name: python3-psycopg2
         state: latest
@@ -113,10 +115,11 @@
         - gcc # needed to build uwsgi
         - git
         - glibc-langpack-de
-        - python3-devel # needed to build Pillow
+        - python3.12
+        - python3.12-devel # needed to build Pillow
         - zlib-devel # needed to build Pillow
         - libjpeg-devel # needed to build Pillow
-        - python3-pip
+        - python3.12-pip
         - '@nginx:1.24/common'
     - name: LaTeX requirements for sphinx and generation of new member letters
       ansible.builtin.dnf:
@@ -171,7 +174,7 @@
       ansible.builtin.pip:
         requirements: /home/svpb/svpb/requirements.txt
         virtualenv: /home/svpb/svpb-venv
-        virtualenv_command: python3 -m venv
+        virtualenv_command: python3.12 -m venv
     - name: Migrate the database
       community.general.django_manage:
         command: migrate
