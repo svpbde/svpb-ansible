@@ -2,7 +2,7 @@
 
 # An Ansible playbook to install the SVPB Web application on a Linux machine
 # Assumptions:
-# - dnf-based system; tested on CentOS 8 Stream
+# - dnf-based system; tested on AlmaLinux 9
 # Currently only intended for tests in a local VM with vagrant.
 # Not tested in production. Production would need a more secure configuration.
 

@@ -62,15 +62,16 @@ sudo apt install vagrant-libvirt libvirt-daemon-system qemu-system-x86
 sudo usermod -a -G libvirt <YOUR USERNAME>
 ```
 
-CentOS peculiarities
---------------------
-CentOS has some peculiarities compared to e.g. Debian.
-Some are listed below for anyone interested in diving into CentOS.
-* Old default python version (currently 3.6, EOL Dec 2021)
+AlmaLinux peculiarities
+-----------------------
+AlmaLinux has some peculiarities compared to e.g. Debian.
+Some are listed below for anyone interested in diving into AlmaLinux.
+* Older default python version which might be EOL
   * Note that security updates are still provided by RedHat (longer than by
     official Python devs)
-* [SELinux](https://www.redhat.com/en/topics/linux/what-is-selinux)
+  * Many Django packages drop support for EOL versions, so we additionally install a
+    specific python version if necessary
 * Concept of *modules* (different versions of the same package installable
-  via package manager)
+  via package manager, e.g. nginx)
 * Not-so-nice texlive packages (incomplete and fine-grained, i.e. on package
   level instead of collections like texlive-science found on other systems)
