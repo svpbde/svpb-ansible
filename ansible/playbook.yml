@@ -23,7 +23,7 @@
   tasks:
     - name: Install postgresql
       ansible.builtin.dnf:
-        name: 'postgresql-server'
+        name: '@postgresql:16/server'
         state: present
     - name: Check if postgresql needs init
       ansible.builtin.stat:
@@ -36,12 +36,12 @@
       ansible.builtin.replace:
         dest: /var/lib/pgsql/data/pg_hba.conf
         regexp: ^(host[ ]+all[ ]+all[ ]+127.0.0.1/32[ ]+)ident
-        replace: \1md5
+        replace: \1scram-sha-256
     - name: Enable local login with hashed password - IPv6
       ansible.builtin.replace:
         dest: /var/lib/pgsql/data/pg_hba.conf
         regexp: ^(host[ ]+all[ ]+all[ ]+::1/128[ ]+)ident
-        replace: \1md5
+        replace: \1scram-sha-256
     - name: Enable & restart service
       ansible.builtin.service:
         name: postgresql
@@ -74,6 +74,15 @@
         privs: ALL
         type: database
         objs: svpbdata
+        role: svpbdb
+    - name: Set Postgres permissions for schema
+      become: true
+      become_user: postgres
+      community.postgresql.postgresql_privs:
+        db: svpbdata
+        privs: USAGE,CREATE
+        type: schema
+        objs: public
         role: svpbdb
 
 
