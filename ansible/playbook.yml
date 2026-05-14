@@ -97,6 +97,18 @@
         generate_ssh_key: true
         state: present
         shell: /bin/bash
+    - name: Place .bashrc file
+      ansible.builtin.copy:
+        dest: /home/svpb/.bashrc
+        src: .bashrc
+        owner: svpb
+        group: svpb
+    - name: Place .bash_profile file
+      ansible.builtin.copy:
+        dest: /home/svpb/.bash_profile
+        src: .bash_profile
+        owner: svpb
+        group: svpb
     - name: Fix home permissions (due to synced folder config created as root)
       ansible.builtin.file:
         path: ~svpb
